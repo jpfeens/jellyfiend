@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jelly Fiend — Travel Journal</title>
+<meta name="description" content="A travel journal and interactive map of trips across Alaska, the world, and New Zealand.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header__brand">
+    <h1>Jelly Fiend</h1>
+    <p class="tagline">A travel journal — Alaska, the world, and New Zealand.</p>
+  </div>
+  <nav class="region-nav" aria-label="Jump to region">
+    <button type="button" class="region-btn" data-region="Alaska">Alaska</button>
+    <button type="button" class="region-btn" data-region="World">World</button>
+    <button type="button" class="region-btn" data-region="New Zealand">New Zealand</button>
+  </nav>
+</header>
+
+<main class="app">
+  <div id="map"></div>
+
+  <aside id="legend" class="legend">
+    <div class="legend__header">
+      <h2>Layers</h2>
+      <div class="legend__actions">
+        <button type="button" id="legend-all">All</button>
+        <button type="button" id="legend-none">None</button>
+      </div>
+    </div>
+    <ul id="legend-list" class="legend__list"><!-- populated by app.js --></ul>
+  </aside>
+
+  <section id="sidebar" class="sidebar" aria-live="polite">
+    <button type="button" id="sidebar-close" class="sidebar__close" aria-label="Close">&times;</button>
+    <div id="sidebar-content" class="sidebar__content"><!-- populated by app.js --></div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>Built with Leaflet &amp; OpenStreetMap · <a href="https://github.com/jpfeens/jellyfiend" target="_blank" rel="noopener">source on GitHub</a></p>
+</footer>
+
+<div id="lightbox" class="lightbox" hidden>
+  <button type="button" id="lightbox-close" class="lightbox__close" aria-label="Close photo">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+  <p id="lightbox-caption" class="lightbox__caption"></p>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="js/trips-data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
