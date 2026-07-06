@@ -83,7 +83,7 @@ const CATEGORIES = {
 // account's token settings once the site is live, so nobody else can
 // use it and eat into your free tier).
 const MAP_CONFIG = {
-  mapboxToken: "pk.eyJ1IjoiamVsbHlmaWVuZCIsImEiOiJjbXFnYmZoczUwNWZxMnFxNGYxdWRtN2xjIn0.y53u1S7_Q0Ql0Elh_q_hBA",
+  mapboxToken: "pk.eyJ1IjoiamVsbHlmaWVuZCIsImEiOiJjbXI5bXU2dngwNHFwMnpwb2gzNWFpM3EzIn0.salWyGs0oGcd1sjojCyhAQ",
   mapboxStyle: "mapbox/dark-v11"
 };
 
