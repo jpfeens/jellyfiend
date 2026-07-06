@@ -22,12 +22,15 @@
     map = L.map("map", { zoomControl: true, worldCopyJump: true });
 
     L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}{r}?access_token=" + MAP_CONFIG.mapboxToken,
       {
         attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: "abcd",
-        maxZoom: 19
+          '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        id: MAP_CONFIG.mapboxStyle,
+        tileSize: 512,
+        zoomOffset: -1,
+        detectRetina: true,
+        maxZoom: 22
       }
     ).addTo(map);
 

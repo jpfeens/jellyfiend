@@ -9,11 +9,30 @@ link in the header takes you back to the splash screen, and the region
 buttons let you jump directly between locations without going back.
 
 It's a plain static site: HTML, CSS, and JavaScript, no build step, no
-server required, no framework, no API keys. It uses:
+server required, no framework. It uses:
 
 - **[Leaflet.js](https://leafletjs.com/)** for the map (loaded from a CDN)
-- **[CARTO dark tiles](https://carto.com/basemaps)** for the basemap (free, no key)
+- **[Mapbox](https://www.mapbox.com/)** for the basemap tiles — requires a free
+  Mapbox account and a public access token (already set up — see `MAP_CONFIG`
+  in `js/trips-data.js`; free tier is generous for a personal site)
 - A single JavaScript file (`js/trips-data.js`) as the entire "database"
+
+### About the Mapbox token
+
+`MAP_CONFIG.mapboxToken` in `trips-data.js` holds a Mapbox *public* token —
+these are designed to be embedded in front-end code (that's the whole point
+of the "public" vs. "secret" token distinction), so committing it to this
+public repo is expected and fine. Two things worth doing once the site is
+live, from your Mapbox account's token settings:
+
+- **Restrict the token to your domain** (`jpfeens.github.io`) so nobody else
+  can use it and burn through your free tier.
+- **Keep an eye on usage** on your Mapbox dashboard if you're ever curious —
+  a personal site like this is nowhere near the free tier limits.
+
+To change the whole map's look, edit `mapboxStyle` in `MAP_CONFIG` — see the
+comment above it in `trips-data.js` for a few built-in options (streets,
+outdoors/terrain, satellite).
 
 ## Previewing it locally
 

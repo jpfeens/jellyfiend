@@ -72,6 +72,21 @@ const CATEGORIES = {
   }
 };
 
+// Map appearance. `mapboxStyle` can be swapped for any Mapbox style ID
+// to change the whole map's look — some good options:
+//   mapbox/dark-v11               (current — dark, clean roads)
+//   mapbox/streets-v12            (classic bright street map)
+//   mapbox/outdoors-v12           (hiking/terrain-focused, contour lines)
+//   mapbox/satellite-streets-v12  (satellite imagery + roads/labels)
+// The token is a Mapbox *public* token — meant to be embedded in
+// front-end code like this (restrict it to your domain in your Mapbox
+// account's token settings once the site is live, so nobody else can
+// use it and eat into your free tier).
+const MAP_CONFIG = {
+  mapboxToken: "pk.eyJ1IjoiamVsbHlmaWVuZCIsImEiOiJjbXFnYmZoczUwNWZxMnFxNGYxdWRtN2xjIn0.y53u1S7_Q0Ql0Elh_q_hBA",
+  mapboxStyle: "mapbox/dark-v11"
+};
+
 // Regions — each one is a "location option" card on the splash screen,
 // and defines where the map centers/zooms when that card is picked.
 // `color` is used for the card accent; `blurb` is the one-line teaser.
