@@ -13,10 +13,11 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="view-splash">
 
 <header class="site-header">
   <div class="site-header__brand">
+    <button type="button" id="back-to-splash" class="back-link" aria-label="Back to all locations">&larr; All locations</button>
     <h1>Jelly Fiend</h1>
     <p class="tagline">A travel journal — Alaska, the world, and New Zealand.</p>
   </div>
@@ -26,6 +27,14 @@
     <button type="button" class="region-btn" data-region="New Zealand">New Zealand</button>
   </nav>
 </header>
+
+<section id="splash" class="splash">
+  <div class="splash__intro">
+    <h2>Where to?</h2>
+    <p>Pick a place to see the trips, hunts, hikes, and recommendations logged there.</p>
+  </div>
+  <div id="splash-cards" class="splash__cards"><!-- populated by app.js --></div>
+</section>
 
 <main class="app">
   <div id="map"></div>

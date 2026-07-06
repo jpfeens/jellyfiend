@@ -7,63 +7,112 @@
 
   var FILTER_STORAGE_KEY = "jellyfiend:activeCategories";
 
-  // ---------------------------------------------------------------
-  // Map init
-  // ---------------------------------------------------------------
-  var map = L.map("map", { zoomControl: true, worldCopyJump: true })
-    .setView(REGIONS["New Zealand"].center, REGIONS["New Zealand"].zoom);
-
-  L.tileLayer(
-    "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: "abcd",
-      maxZoom: 19
-    }
-  ).addTo(map);
-
-  // ---------------------------------------------------------------
-  // Build markers
-  // ---------------------------------------------------------------
-  var activeCategories = loadActiveCategories();
+  var map = null; // created lazily — see initMap() — Leaflet can't measure
+                  // a container that's still display:none on the splash screen
   var markerRecords = []; // { trip, marker, categories }
+  var activeCategories = loadActiveCategories();
+  var currentRegion = null;
 
-  TRIPS.forEach(function (trip) {
-    var primaryCat = trip.categories[0];
-    var meta = CATEGORIES[primaryCat] || { color: "#999", icon: "📍" };
+  // ---------------------------------------------------------------
+  // Map init (called once, the first time a location card is picked)
+  // ---------------------------------------------------------------
+  function initMap() {
+    if (map) return;
 
-    var icon = L.divIcon({
-      className: "",
-      html:
-        '<div class="trip-marker" style="background:' +
-        meta.color +
-        '">' +
-        meta.icon +
-        "</div>",
-      iconSize: [30, 30],
-      popupAnchor: [0, -12]
+    map = L.map("map", { zoomControl: true, worldCopyJump: true });
+
+    L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: "abcd",
+        maxZoom: 19
+      }
+    ).addTo(map);
+
+    TRIPS.forEach(function (trip) {
+      var primaryCat = trip.categories[0];
+      var meta = CATEGORIES[primaryCat] || { color: "#999", icon: "📍" };
+
+      var icon = L.divIcon({
+        className: "",
+        html:
+          '<div class="trip-marker" style="background:' +
+          meta.color +
+          '">' +
+          meta.icon +
+          "</div>",
+        iconSize: [30, 30],
+        popupAnchor: [0, -12]
+      });
+
+      var marker = L.marker(trip.coords, { icon: icon, title: trip.title });
+      marker.bindTooltip(trip.title, { direction: "top", offset: [0, -10] });
+      marker.on("click", function () {
+        openSidebar(trip);
+      });
+
+      if (trip.route && trip.route.length > 1) {
+        L.polyline(trip.route, {
+          color: meta.color,
+          weight: 3,
+          opacity: 0.7,
+          dashArray: "6 6"
+        }).addTo(map);
+      }
+
+      markerRecords.push({ trip: trip, marker: marker, categories: trip.categories });
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // Splash screen — one card per region in REGIONS
+  // ---------------------------------------------------------------
+  var splashCards = document.getElementById("splash-cards");
+
+  Object.keys(REGIONS).forEach(function (regionName) {
+    var region = REGIONS[regionName];
+    var count = TRIPS.filter(function (t) { return t.region === regionName; }).length;
+
+    var card = document.createElement("button");
+    card.type = "button";
+    card.className = "location-card";
+    card.style.setProperty("--card-accent", region.color || "var(--accent)");
+    card.innerHTML =
+      '<span class="location-card__accent"></span>' +
+      "<h3>" + escapeHtml(regionName) + "</h3>" +
+      "<p>" + escapeHtml(region.blurb || "") + "</p>" +
+      '<span class="location-card__count">' + count + (count === 1 ? " entry" : " entries") + "</span>";
+
+    card.addEventListener("click", function () {
+      goToRegion(regionName);
     });
 
-    var marker = L.marker(trip.coords, { icon: icon, title: trip.title });
-    marker.bindTooltip(trip.title, { direction: "top", offset: [0, -10] });
-    marker.on("click", function () {
-      openSidebar(trip);
-    });
-
-    if (trip.route && trip.route.length > 1) {
-      L.polyline(trip.route, {
-        color: meta.color,
-        weight: 3,
-        opacity: 0.7,
-        dashArray: "6 6"
-      }).addTo(map);
-    }
-
-    markerRecords.push({ trip: trip, marker: marker, categories: trip.categories });
+    splashCards.appendChild(card);
   });
 
-  applyFilters();
+  function goToRegion(regionName) {
+    var region = REGIONS[regionName];
+    if (!region) return;
+
+    initMap();
+    currentRegion = regionName;
+    document.body.classList.remove("view-splash");
+    document.body.classList.add("view-map");
+
+    // The map container was hidden (display:none) until now, so Leaflet
+    // needs both a resize check and an explicit view set.
+    map.invalidateSize();
+    map.setView(region.center, region.zoom);
+    applyFilters();
+  }
+
+  document.getElementById("back-to-splash").addEventListener("click", function () {
+    document.body.classList.remove("view-map");
+    document.body.classList.add("view-splash");
+    closeSidebar();
+  });
 
   // ---------------------------------------------------------------
   // Legend
@@ -128,8 +177,11 @@
   }
 
   function applyFilters() {
+    if (!map) return;
     markerRecords.forEach(function (rec) {
-      var visible = rec.categories.some(function (c) { return activeCategories.has(c); });
+      var matchesRegion = !currentRegion || rec.trip.region === currentRegion;
+      var matchesCategory = rec.categories.some(function (c) { return activeCategories.has(c); });
+      var visible = matchesRegion && matchesCategory;
       var onMap = map.hasLayer(rec.marker);
       if (visible && !onMap) rec.marker.addTo(map);
       if (!visible && onMap) map.removeLayer(rec.marker);
@@ -154,12 +206,12 @@
   }
 
   // ---------------------------------------------------------------
-  // Region quick-nav
+  // Region quick-nav (visible once already in map view, for switching
+  // between locations without going back to the splash screen)
   // ---------------------------------------------------------------
   document.querySelectorAll(".region-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      var region = REGIONS[btn.dataset.region];
-      if (region) map.flyTo(region.center, region.zoom);
+      goToRegion(btn.dataset.region);
     });
   });
 

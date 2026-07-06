@@ -72,11 +72,28 @@ const CATEGORIES = {
   }
 };
 
-// Region quick-nav — used by the "jump to region" buttons.
+// Regions — each one is a "location option" card on the splash screen,
+// and defines where the map centers/zooms when that card is picked.
+// `color` is used for the card accent; `blurb` is the one-line teaser.
 const REGIONS = {
-  "Alaska": { center: [63.5, -152.0], zoom: 5 },
-  "World": { center: [15, 10], zoom: 2 },
-  "New Zealand": { center: [-41.3, 172.6], zoom: 5.3 }
+  "Alaska": {
+    center: [63.5, -152.0],
+    zoom: 5,
+    blurb: "Where it all started — road trips, hunts, and weekend cabins.",
+    color: "#3987e5"
+  },
+  "World": {
+    center: [15, 10],
+    zoom: 2,
+    blurb: "Everywhere else — backpacking, big trips, far-flung trails.",
+    color: "#9085e9"
+  },
+  "New Zealand": {
+    center: [-41.3, 172.6],
+    zoom: 5.3,
+    blurb: "Home base now — hikes, fishing spots, and local favorites.",
+    color: "#199e70"
+  }
 };
 
 const TRIPS = [

@@ -1,9 +1,12 @@
 # Jelly Fiend — Travel Journal
 
-An interactive map of trips — Alaska, world travel, and New Zealand — with
-photo galleries, trip reports, and recommendations, filterable by layer
+Landing on a splash screen with one card per location (Alaska, World, New
+Zealand) — pick one and it drops you into an interactive map of trips there,
+with photo galleries, trip reports, and recommendations, filterable by layer
 (Road Trip, Weekend Warrior, Hunt, Extended Vacation, Hiking/Biking
-recommendations, Fishing, Food & Local recommendations).
+recommendations, Fishing, Food & Local recommendations). A "← All locations"
+link in the header takes you back to the splash screen, and the region
+buttons let you jump directly between locations without going back.
 
 It's a plain static site: HTML, CSS, and JavaScript, no build step, no
 server required, no framework, no API keys. It uses:
@@ -55,6 +58,18 @@ Set `"kind": "trip"` for a full narrative trip report, or `"kind":
 (a recommended hike, restaurant, etc). Recommendation entries can include
 an optional `recommendation` object with free-form fields like
 `difficulty`, `distance`, `bestTime`, `tips` — whatever's relevant.
+
+### Regions / splash-screen cards
+
+Defined in the `REGIONS` object in `trips-data.js` (currently `Alaska`,
+`World`, `New Zealand`). Each one becomes a card on the splash screen —
+`blurb` is the one-line teaser text, `color` is the card's accent color,
+and `center`/`zoom` control where the map lands when that card is picked.
+The "entries" count on each card is computed automatically from how many
+trips in `TRIPS` have that `region`. To add a new location (say you start
+traveling somewhere new), add an entry to `REGIONS` and start tagging
+trips with that region — a new card appears automatically, no HTML/CSS
+changes needed.
 
 ## Removing the sample trips
 
