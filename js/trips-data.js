@@ -13,62 +13,36 @@
  *   4. Drop your photos in images/trips/<id>/ and list them under `photos`.
  *   5. Save the file and refresh index.html — that's it, no build step.
  *
- * CATEGORIES (a trip can have more than one — e.g. a road trip that
- * included a great hike can be tagged both "roadtrip" and "hiking-biking"):
- *   roadtrip           - multi-stop drives
- *   weekend-warrior    - short 1-3 day trips
- *   hunt               - hunting trips
- *   extended-vacation  - longer trips / big vacations
- *   hiking-biking      - recommended trails/routes (kind: "recommendation")
- *   fishing            - fishing trips
- *   food-local         - recommended restaurants/local spots (kind: "recommendation")
+ * TAGS are freeform — just type whatever hashtags make sense for the
+ * trip in the `tags` array (lowercase, hyphenate multi-word tags: e.g.
+ * "roadtrip", "bear-encounter", "alaska2019"). There's no fixed list to
+ * maintain anywhere — every unique tag used across all trips
+ * automatically shows up as a clickable "#tag" chip in the hashtag bar
+ * above the map, and a trip can have as many tags as you want. A road
+ * trip that included a great hike can just be tagged
+ * ["roadtrip", "hiking-biking"].
  *
  * KIND:
  *   "trip"           - a narrative trip report (date, story, photos)
  *   "recommendation" - a shorter "here's a spot I recommend" entry
  *                       (uses the optional `recommendation` block below)
+ *   Unlike tags, `kind` is one of these two fixed values — it drives the
+ *   marker icon/color on the map (see KIND_STYLES) and which fields the
+ *   sidebar renders.
  * ---------------------------------------------------------------------
  */
 
-// Category metadata: colors follow a validated categorical palette
-// (see the dataviz skill) so they stay colorblind-distinguishable;
-// icons are the *primary* way to tell categories apart (color is a
-// backup), which is why every marker also carries its category icon.
-const CATEGORIES = {
-  "roadtrip": {
-    label: "Road Trip",
-    icon: "🚐",
+// Fixed, 2-value styling for map markers — deliberately NOT tied to tags
+// (tags are freeform and unbounded, so they can't carry a reliable color
+// identity; `kind` is a small fixed set, so it's what markers encode).
+const KIND_STYLES = {
+  "trip": {
+    icon: "📍",
     color: "#3987e5"
   },
-  "weekend-warrior": {
-    label: "Weekend Warrior",
-    icon: "🎒",
-    color: "#199e70"
-  },
-  "hunt": {
-    label: "Hunt",
-    icon: "🏹",
-    color: "#c98500"
-  },
-  "extended-vacation": {
-    label: "Extended Vacation",
-    icon: "✈️",
-    color: "#008300"
-  },
-  "hiking-biking": {
-    label: "Hiking / Biking Rec",
-    icon: "🥾",
+  "recommendation": {
+    icon: "★",
     color: "#9085e9"
-  },
-  "fishing": {
-    label: "Fishing",
-    icon: "🎣",
-    color: "#e66767"
-  },
-  "food-local": {
-    label: "Food & Local Rec",
-    icon: "🍴",
-    color: "#d55181"
   }
 };
 
@@ -95,20 +69,38 @@ const REGIONS = {
     center: [63.5, -152.0],
     zoom: 5,
     blurb: "Where it all started — road trips, hunts, and weekend cabins.",
-    color: "#3987e5"
+    color: "#d9705a" // salmon
   },
   "World": {
     center: [15, 10],
     zoom: 2,
     blurb: "Everywhere else — backpacking, big trips, far-flung trails.",
-    color: "#9085e9"
+    color: "#a8a08e" // warm gray
   },
   "New Zealand": {
     center: [-41.3, 172.6],
     zoom: 5.3,
     blurb: "Home base now — hikes, fishing spots, and local favorites.",
-    color: "#199e70"
+    color: "#7c9468" // sage
   }
+};
+
+// The big stacked "Life is for..." words on the splash screen.
+//   words        - the full pool. Add as many as you want any time —
+//                  you don't need to touch anything else.
+//   visibleCount - how many show at once (stacked vertically).
+//   rotateMs     - how often one visible word gets swapped for one
+//                  from the rest of the pool. If the pool is the same
+//                  size as (or smaller than) visibleCount, everything
+//                  just shows statically with no rotation.
+//   montageImage - path to the collage image the words are "cut out"
+//                  of. Regenerate it from your real trip photos any
+//                  time with: node scripts/build-montage.js
+const LIFE_HERO = {
+  words: ["EXPLORING", "LAUGHING", "LOVING", "SEEKING", "LIVING", "INVENTING"],
+  visibleCount: 5,
+  rotateMs: 4000,
+  montageImage: "images/montage.jpg"
 };
 
 const TRIPS = [
@@ -119,7 +111,7 @@ const TRIPS = [
     date: "July 2019",
     region: "Alaska",
     location: "Anchorage → Denali → Fairbanks → Valdez",
-    categories: ["roadtrip", "extended-vacation"],
+    tags: ["roadtrip", "extended-vacation"],
     coords: [63.1148, -151.1926],
     route: [
       [61.2181, -149.9003],
@@ -142,7 +134,7 @@ const TRIPS = [
     date: "August 2018",
     region: "Alaska",
     location: "Kenai Peninsula, Alaska",
-    categories: ["weekend-warrior"],
+    tags: ["weekend-warrior"],
     coords: [60.4708, -150.9317],
     summary: "A quick 48-hour escape to a lakeside cabin — proof you don't need two weeks off to get somewhere incredible.",
     body: "Replace this with your real trip report.\n\nGood spot for: quick logistics notes, what you'd do differently, whether you'd go back.",
@@ -158,7 +150,7 @@ const TRIPS = [
     date: "September 2017",
     region: "Alaska",
     location: "Alaska Range",
-    categories: ["hunt", "extended-vacation"],
+    tags: ["hunt", "extended-vacation"],
     coords: [63.35, -147.1],
     summary: "A ten-day backcountry sheep hunt — glassing ridgelines, bad weather days, and the pack-out that followed.",
     body: "Replace this with your real trip report.\n\nGood spot for: unit/area notes (as much or as little as you want to make public), gear that worked, gear that didn't, physical prep.",
@@ -173,7 +165,7 @@ const TRIPS = [
     date: "November 2021",
     region: "World",
     location: "Torres del Paine National Park, Chile",
-    categories: ["extended-vacation", "hiking-biking"],
+    tags: ["extended-vacation", "hiking-biking"],
     coords: [-50.9423, -73.4068],
     summary: "The W Trek, five days, and some of the best mountain scenery on earth.",
     body: "Replace this with your real trip report.",
@@ -189,7 +181,7 @@ const TRIPS = [
     date: "January–February 2020",
     region: "World",
     location: "Thailand, Vietnam, Cambodia",
-    categories: ["extended-vacation"],
+    tags: ["extended-vacation"],
     coords: [13.4125, 103.8667],
     summary: "Three countries, one backpack, and a lot of overnight buses.",
     body: "Replace this with your real trip report.",
@@ -204,7 +196,7 @@ const TRIPS = [
     date: "",
     region: "New Zealand",
     location: "Tongariro National Park, NZ",
-    categories: ["hiking-biking"],
+    tags: ["hiking-biking"],
     coords: [-39.1378, 175.6420],
     summary: "One of the best single-day hikes in the world — volcanic craters, emerald lakes, the works.",
     recommendation: {
@@ -225,7 +217,7 @@ const TRIPS = [
     date: "March 2023",
     region: "New Zealand",
     location: "Lake Wakatipu / Kawarau River, NZ",
-    categories: ["fishing"],
+    tags: ["fishing"],
     coords: [-45.0312, 168.6626],
     summary: "Chasing brown trout in some of the clearest water you'll ever fish.",
     body: "Replace this with your real trip report.",
@@ -240,7 +232,7 @@ const TRIPS = [
     date: "",
     region: "New Zealand",
     location: "Wanaka, NZ",
-    categories: ["food-local"],
+    tags: ["food-local"],
     coords: [-44.7000, 169.1500],
     summary: "Replace with why you'd send someone here — the dish to order, the view from the table, whatever sold you.",
     recommendation: {
@@ -258,7 +250,7 @@ const TRIPS = [
     date: "October 2023",
     region: "New Zealand",
     location: "Wanaka, NZ",
-    categories: ["weekend-warrior", "hiking-biking"],
+    tags: ["weekend-warrior", "hiking-biking"],
     coords: [-44.7583, 169.0631],
     summary: "That view. Early start, steep climb, worth every step.",
     body: "Replace this with your real trip report.",

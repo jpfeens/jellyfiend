@@ -52,7 +52,7 @@ walks through the fields. In short:
 
 1. Copy one of the existing objects in the `TRIPS` array.
 2. Give it a unique `id`.
-3. Fill in `title`, `date`, `region`, `location`, `categories`, `coords`
+3. Fill in `title`, `date`, `region`, `location`, `tags`, `coords`
    (`[latitude, longitude]` — right-click a spot on Google Maps to copy
    these), `summary`, and `body` (your full write-up).
 4. Put your photos in `images/trips/<id>/` and list them under `photos`.
@@ -60,15 +60,16 @@ walks through the fields. In short:
 
 No build step, no compiling — it's just a JavaScript array.
 
-### Categories / layers
+### Tags / hashtags
 
-Defined in the `CATEGORIES` object near the top of `trips-data.js`:
-`roadtrip`, `weekend-warrior`, `hunt`, `extended-vacation`,
-`hiking-biking`, `fishing`, `food-local`. A trip can belong to more than
-one (e.g. a road trip that included a great hike: `["roadtrip",
-"hiking-biking"]`). To add a brand-new layer, add an entry to
-`CATEGORIES` with a `label`, `icon` (an emoji works fine), and `color`,
-then use its key in a trip's `categories` array.
+There's no fixed list to maintain — `tags` on a trip is just an array of
+whatever freeform hashtags make sense (lowercase, hyphenate multi-word
+ones: `"roadtrip"`, `"bear-encounter"`, `"alaska2019"`). A trip can have
+as many as you want (e.g. a road trip that included a great hike:
+`["roadtrip", "hiking-biking"]`). Every unique tag used across all trips
+automatically shows up as a clickable `#tag` chip in the hashtag bar
+above the map — add a brand-new tag to any trip and it just appears
+there next time you load the page, no separate config to touch.
 
 ### Recommendations vs. trip reports
 
@@ -89,6 +90,39 @@ trips in `TRIPS` have that `region`. To add a new location (say you start
 traveling somewhere new), add an entry to `REGIONS` and start tagging
 trips with that region — a new card appears automatically, no HTML/CSS
 changes needed.
+
+### Color theme
+
+The palette is black / gray / sage / salmon, defined as CSS custom
+properties at the top of `css/style.css`: `--accent` (salmon, the primary
+interactive color — active hashtags, buttons, links), `--sage` (secondary
+accent), and `--gray-warm` (used for the World card). Change any of these
+in one place to retheme the whole site.
+
+### The "Life is for..." splash words
+
+Defined in `LIFE_HERO` near the top of `trips-data.js` — a `words` pool,
+how many show at once (`visibleCount`), how often one rotates out
+(`rotateMs`), and which image the text is "cut out" of (`montageImage`).
+Add as many words to the pool as you want, any time — nothing else needs
+to change. If the pool is bigger than `visibleCount`, the extra words
+rotate in and out on their own.
+
+The words are filled with a photo montage using a CSS trick
+(`background-clip: text`) — the montage image shows through the letter
+shapes. `images/montage.jpg` is a grid collage built from whatever
+photos currently exist under `images/trips/`. Once you've uploaded real
+trip photos, rebuild it with:
+
+```
+node scripts/build-montage.js
+```
+
+(You'll need Node installed locally for this one script — everything
+else about the site needs zero tooling.) It grabs one photo from each
+trip folder by default; edit `scripts/build-montage.js` to hand-pick
+specific photos instead if you'd rather choose exactly which ones go
+into the collage.
 
 ## Removing the sample trips
 
@@ -135,11 +169,13 @@ anything, then push.)
 
 ```
 index.html              the whole page shell
-css/style.css           all styling (dark theme, responsive)
-js/trips-data.js        your trip/recommendation data — edit this to add content
-js/app.js                map, filtering, sidebar, lightbox logic
+css/style.css           all styling (color theme, splash hero, dark theme, responsive)
+js/trips-data.js        your trip/recommendation data, tags, regions, life-hero words
+js/app.js                map, hashtag filtering, sidebar, splash hero, lightbox logic
 images/trips/<id>/       photos, one folder per trip
-scripts/                 one-off helper that generated the placeholder photos
+images/montage.jpg       collage behind the splash-screen words — rebuild with the script below
+scripts/generate-placeholders.js  one-off helper that made the placeholder photos
+scripts/build-montage.js         rebuilds images/montage.jpg from current trip photos
 ```
 
 ## Ideas for later

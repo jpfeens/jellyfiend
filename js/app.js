@@ -1,17 +1,88 @@
 /*
- * app.js — map init, filtering, sidebar rendering.
- * Reads CATEGORIES / REGIONS / TRIPS from js/trips-data.js.
+ * app.js — map init, hashtag filtering, sidebar rendering.
+ * Reads KIND_STYLES / MAP_CONFIG / REGIONS / TRIPS from js/trips-data.js.
  */
 (function () {
   "use strict";
 
-  var FILTER_STORAGE_KEY = "jellyfiend:activeCategories";
+  var FILTER_STORAGE_KEY = "jellyfiend:activeTags";
 
   var map = null; // created lazily — see initMap() — Leaflet can't measure
                   // a container that's still display:none on the splash screen
-  var markerRecords = []; // { trip, marker, categories }
-  var activeCategories = loadActiveCategories();
+  var markerRecords = []; // { trip, marker, tags }
+  var allTags = collectAllTags();
+  var activeTags = loadActiveTags();
   var currentRegion = null;
+
+  function collectAllTags() {
+    var set = new Set();
+    TRIPS.forEach(function (trip) {
+      (trip.tags || []).forEach(function (t) { set.add(t); });
+    });
+    return Array.from(set).sort();
+  }
+
+  // ---------------------------------------------------------------
+  // "Life is for..." stacked words (splash hero, photo-fill text)
+  // ---------------------------------------------------------------
+  (function initLifeWords() {
+    var container = document.getElementById("life-words");
+    if (!container || typeof LIFE_HERO === "undefined") return;
+
+    var pool = LIFE_HERO.words.slice();
+    var visibleCount = Math.min(LIFE_HERO.visibleCount || 5, pool.length);
+    var montage = LIFE_HERO.montageImage;
+
+    // Shuffle a copy, take the first N as the initial visible set.
+    var shuffled = pool.slice().sort(function () { return Math.random() - 0.5; });
+    var visibleWords = shuffled.slice(0, visibleCount);
+
+    var wordEls = visibleWords.map(function (word, i) {
+      var el = document.createElement("span");
+      el.className = "life-word";
+      applyWord(el, word, i);
+      container.appendChild(el);
+      return el;
+    });
+
+    function applyWord(el, word, slotIndex) {
+      el.textContent = word;
+      if (montage) {
+        el.style.backgroundImage = "url('" + montage + "')";
+        // Give each slot/word a different pan position into the montage
+        // so the stacked words don't all show the exact same crop.
+        var seed = hashString(word + slotIndex);
+        el.style.backgroundPosition = (seed % 100) + "% " + ((seed * 7) % 100) + "%";
+      }
+    }
+
+    function hashString(str) {
+      var h = 0;
+      for (var i = 0; i < str.length; i++) {
+        h = (h * 31 + str.charCodeAt(i)) >>> 0;
+      }
+      return h;
+    }
+
+    // Only rotate if there are more words in the pool than we're
+    // showing — otherwise there's nothing to swap in.
+    if (pool.length > visibleCount) {
+      setInterval(function () {
+        var slotIndex = Math.floor(Math.random() * wordEls.length);
+        var hidden = pool.filter(function (w) { return visibleWords.indexOf(w) === -1; });
+        if (!hidden.length) return;
+        var nextWord = hidden[Math.floor(Math.random() * hidden.length)];
+        var el = wordEls[slotIndex];
+
+        el.classList.add("is-fading");
+        setTimeout(function () {
+          visibleWords[slotIndex] = nextWord;
+          applyWord(el, nextWord, slotIndex);
+          el.classList.remove("is-fading");
+        }, 400); // matches the .life-word opacity transition duration
+      }, LIFE_HERO.rotateMs || 4000);
+    }
+  })();
 
   // ---------------------------------------------------------------
   // Map init (called once, the first time a location card is picked)
@@ -35,16 +106,15 @@
     ).addTo(map);
 
     TRIPS.forEach(function (trip) {
-      var primaryCat = trip.categories[0];
-      var meta = CATEGORIES[primaryCat] || { color: "#999", icon: "📍" };
+      var style = KIND_STYLES[trip.kind] || KIND_STYLES.trip;
 
       var icon = L.divIcon({
         className: "",
         html:
           '<div class="trip-marker" style="background:' +
-          meta.color +
+          style.color +
           '">' +
-          meta.icon +
+          style.icon +
           "</div>",
         iconSize: [30, 30],
         popupAnchor: [0, -12]
@@ -58,14 +128,14 @@
 
       if (trip.route && trip.route.length > 1) {
         L.polyline(trip.route, {
-          color: meta.color,
+          color: style.color,
           weight: 3,
           opacity: 0.7,
           dashArray: "6 6"
         }).addTo(map);
       }
 
-      markerRecords.push({ trip: trip, marker: marker, categories: trip.categories });
+      markerRecords.push({ trip: trip, marker: marker, tags: trip.tags || [] });
     });
   }
 
@@ -118,93 +188,93 @@
   });
 
   // ---------------------------------------------------------------
-  // Legend
+  // Hashtag bar — one chip per unique tag used across all trips.
+  // Freeform: there's no fixed list to maintain, it's derived from
+  // whatever tags show up in trips-data.js.
   // ---------------------------------------------------------------
-  var legendList = document.getElementById("legend-list");
+  var tagBar = document.getElementById("tag-bar");
 
-  Object.keys(CATEGORIES).forEach(function (catId) {
-    var meta = CATEGORIES[catId];
-    var li = document.createElement("li");
-    li.className = "legend__item";
+  function renderTagBar() {
+    tagBar.innerHTML = "";
 
-    var checked = activeCategories.has(catId) ? "checked" : "";
-    li.innerHTML =
-      '<input type="checkbox" id="cat-' +
-      catId +
-      '" ' +
-      checked +
-      ' />' +
-      '<span class="legend__swatch" style="background:' +
-      meta.color +
-      '">' +
-      meta.icon +
-      "</span>" +
-      '<label class="legend__label" for="cat-' +
-      catId +
-      '">' +
-      meta.label +
-      "</label>";
+    allTags.forEach(function (tag) {
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "hashtag hashtag--toggle";
+      chip.textContent = "#" + tag;
+      chip.setAttribute("aria-pressed", activeTags.has(tag) ? "true" : "false");
+      chip.classList.toggle("is-active", activeTags.has(tag));
 
-    legendList.appendChild(li);
+      chip.addEventListener("click", function () {
+        if (activeTags.has(tag)) {
+          activeTags.delete(tag);
+        } else {
+          activeTags.add(tag);
+        }
+        saveActiveTags();
+        chip.classList.toggle("is-active", activeTags.has(tag));
+        chip.setAttribute("aria-pressed", activeTags.has(tag) ? "true" : "false");
+        applyFilters();
+      });
 
-    li.querySelector("input").addEventListener("change", function (e) {
-      if (e.target.checked) {
-        activeCategories.add(catId);
-      } else {
-        activeCategories.delete(catId);
-      }
-      saveActiveCategories();
+      tagBar.appendChild(chip);
+    });
+
+    var allBtn = document.createElement("button");
+    allBtn.type = "button";
+    allBtn.className = "tag-bar__action";
+    allBtn.textContent = "All";
+    allBtn.addEventListener("click", function () {
+      allTags.forEach(function (t) { activeTags.add(t); });
+      saveActiveTags();
+      renderTagBar();
       applyFilters();
     });
-  });
 
-  document.getElementById("legend-all").addEventListener("click", function () {
-    Object.keys(CATEGORIES).forEach(function (c) { activeCategories.add(c); });
-    syncLegendCheckboxes();
-    saveActiveCategories();
-    applyFilters();
-  });
-
-  document.getElementById("legend-none").addEventListener("click", function () {
-    activeCategories.clear();
-    syncLegendCheckboxes();
-    saveActiveCategories();
-    applyFilters();
-  });
-
-  function syncLegendCheckboxes() {
-    Object.keys(CATEGORIES).forEach(function (catId) {
-      var box = document.getElementById("cat-" + catId);
-      if (box) box.checked = activeCategories.has(catId);
+    var noneBtn = document.createElement("button");
+    noneBtn.type = "button";
+    noneBtn.className = "tag-bar__action";
+    noneBtn.textContent = "None";
+    noneBtn.addEventListener("click", function () {
+      activeTags.clear();
+      saveActiveTags();
+      renderTagBar();
+      applyFilters();
     });
+
+    tagBar.appendChild(allBtn);
+    tagBar.appendChild(noneBtn);
   }
+
+  renderTagBar();
 
   function applyFilters() {
     if (!map) return;
     markerRecords.forEach(function (rec) {
       var matchesRegion = !currentRegion || rec.trip.region === currentRegion;
-      var matchesCategory = rec.categories.some(function (c) { return activeCategories.has(c); });
-      var visible = matchesRegion && matchesCategory;
+      var matchesTags = rec.tags.some(function (t) { return activeTags.has(t); });
+      var visible = matchesRegion && matchesTags;
       var onMap = map.hasLayer(rec.marker);
       if (visible && !onMap) rec.marker.addTo(map);
       if (!visible && onMap) map.removeLayer(rec.marker);
     });
   }
 
-  function loadActiveCategories() {
+  function loadActiveTags() {
     try {
       var raw = window.localStorage.getItem(FILTER_STORAGE_KEY);
-      if (raw) return new Set(JSON.parse(raw));
+      if (raw) {
+        // Only keep tags that still actually exist (data may have changed).
+        var saved = JSON.parse(raw).filter(function (t) { return allTags.indexOf(t) !== -1; });
+        return new Set(saved);
+      }
     } catch (e) { /* ignore, e.g. storage disabled */ }
-    return new Set(Object.keys(CATEGORIES));
+    return new Set(allTags);
   }
 
-  function saveActiveCategories() {
+  function saveActiveTags() {
     try {
-      window.localStorage.setItem(
-        FILTER_STORAGE_KEY,
-        JSON.stringify(Array.from(activeCategories))
-      );
+      window.localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(Array.from(activeTags)));
     } catch (e) { /* ignore */ }
   }
 
@@ -242,19 +312,9 @@
   }
 
   function renderTrip(trip) {
-    var badges = trip.categories
-      .map(function (catId) {
-        var meta = CATEGORIES[catId];
-        if (!meta) return "";
-        return (
-          '<span class="badge"><span class="badge__dot" style="background:' +
-          meta.color +
-          '"></span>' +
-          meta.icon +
-          " " +
-          meta.label +
-          "</span>"
-        );
+    var badges = (trip.tags || [])
+      .map(function (tag) {
+        return '<span class="hashtag hashtag--static">#' + escapeHtml(tag) + "</span>";
       })
       .join("");
 
