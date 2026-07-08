@@ -124,6 +124,21 @@ trip folder by default; edit `scripts/build-montage.js` to hand-pick
 specific photos instead if you'd rather choose exactly which ones go
 into the collage.
 
+### Fonts
+
+Google Fonts (Anton, Fraunces, Inter, Poppins) are loaded via the
+`<link>` tag in `index.html` — free for any use, no setup needed.
+
+The "Life is for..." lead text uses **Chandrawinata**, a script font
+that's self-hosted from `fonts/` (via `@font-face` in `style.css`)
+instead of Google Fonts, because it isn't distributed there. It's the
+**free, personal-use-only** version from
+[dafont.com](https://www.dafont.com/chandrawinata.font) — fine for a
+personal, non-monetized site like this one, but if this site ever adds
+ads, sponsorships, or anything commercial, a commercial license would
+need to be purchased (available via Font Bundles or Creative Market)
+and the files in `fonts/` swapped for the licensed versions.
+
 ## Removing the sample trips
 
 Everything currently in `trips-data.js` is placeholder content so you can
@@ -174,6 +189,7 @@ js/trips-data.js        your trip/recommendation data, tags, regions, life-hero 
 js/app.js                map, hashtag filtering, sidebar, splash hero, lightbox logic
 images/trips/<id>/       photos, one folder per trip
 images/montage.jpg       collage behind the splash-screen words — rebuild with the script below
+fonts/                   self-hosted Chandrawinata font (personal-use license, see Fonts section)
 scripts/generate-placeholders.js  one-off helper that made the placeholder photos
 scripts/build-montage.js         rebuilds images/montage.jpg from current trip photos
 ```

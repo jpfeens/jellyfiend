@@ -20,8 +20,19 @@
 
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-hero: "Anton", "Archivo Black", sans-serif; /* splash "Life is for..." lead text */
+  --font-hero: "Chandrawinata", cursive; /* splash "Life is for..." lead text */
   --font-hero-words: "Poppins", "Inter", system-ui, sans-serif; /* stacked words (EXPLORING, LAUGHING...) */
+}
+
+/* Self-hosted — free version is personal-use only (see fonts/LICENSE.txt).
+   A commercial license would be needed if this site is ever monetized. */
+@font-face {
+  font-family: "Chandrawinata";
+  src: url("../fonts/Chandrawinata.woff") format("woff"),
+       url("../fonts/Chandrawinata.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 * { box-sizing: border-box; }
@@ -142,9 +153,9 @@ body.view-map .back-link {
 .life-hero__lead {
   font-family: var(--font-hero);
   font-weight: 400;
-  text-transform: uppercase;
-  font-size: clamp(2.2rem, 6.5vw, 4.2rem);
-  line-height: 0.95;
+  text-transform: none;
+  font-size: clamp(2.6rem, 7.5vw, 5rem);
+  line-height: 1;
   color: var(--text-primary);
   margin: 0;
   flex: none;

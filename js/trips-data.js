@@ -97,7 +97,7 @@ const REGIONS = {
 //                  of. Regenerate it from your real trip photos any
 //                  time with: node scripts/build-montage.js
 const LIFE_HERO = {
-  words: ["EXPLORING", "LAUGHING", "LOVING", "SEEKING", "LIVING", "INVENTING"],
+  words: ["EXPLORING", "LAUGHING", "LOVING", "SEEKING", "LIVING", "INVENTING", "DISCOVERING"],
   visibleCount: 5,
   rotateMs: 4000,
   montageImage: "images/montage.jpg"
