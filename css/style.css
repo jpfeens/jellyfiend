@@ -20,7 +20,8 @@
 
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-hero: "Anton", "Archivo Black", sans-serif; /* splash "Life is for..." + stacked words */
+  --font-hero: "Anton", "Archivo Black", sans-serif; /* splash "Life is for..." lead text */
+  --font-hero-words: "Poppins", "Inter", system-ui, sans-serif; /* stacked words (EXPLORING, LAUGHING...) */
 }
 
 * { box-sizing: border-box; }
@@ -152,14 +153,14 @@ body.view-map .back-link {
 .life-words {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 0;
   line-height: 0.92;
 }
 
 .life-word {
-  font-family: var(--font-hero);
-  font-weight: 400;
+  font-family: var(--font-hero-words);
+  font-weight: 600;
   font-size: clamp(2.1rem, 8vw, 5.2rem);
   text-transform: uppercase;
   letter-spacing: -0.01em;
