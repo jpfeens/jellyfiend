@@ -384,10 +384,9 @@ body.view-map .back-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.55);
-  font-size: 15px;
+  font-size: 22px;
   line-height: 1;
+  filter: drop-shadow(0 0 3px rgba(0,0,0,0.85));
 }
 
 .ferry-marker {

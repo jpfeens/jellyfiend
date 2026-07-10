@@ -110,12 +110,7 @@
 
       var icon = L.divIcon({
         className: "",
-        html:
-          '<div class="trip-marker" style="background:' +
-          style.color +
-          '">' +
-          style.icon +
-          "</div>",
+        html: '<div class="trip-marker">' + style.icon + "</div>",
         iconSize: [30, 30],
         popupAnchor: [0, -12]
       });
