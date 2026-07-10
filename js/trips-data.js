@@ -316,6 +316,30 @@ const TRIPS = [
     ],
     summary: "A Christmas-time loop from Christchurch through the North Island's volcanic heart and Hobbit country to the Coromandel and back — camping, waterfalls, hot streams, and more than a few Lord of the Rings filming spots.",
     body: "Drove from Christchurch to Picton, caught the ferry over to Wellington, then drove up to Otaki and camped at Otaki Forks Campsite for the first night.\n\nSecond day, drove past Taranaki (which was completely in the clouds) to New Plymouth for lunch — it was raining. Then past the Three Sisters and the Elephant Rock, through Piopio, and down to Ohinepane Camping Area for the second night.\n\nNext, drove down to Tongariro and hiked the Waitonga Falls Track, then up to Tawhai Falls and Gollum's Pool. Drove past Mount Doom on the way to Lake Taupo, where I stayed at an Airbnb.\n\nThe next day I checked out Lake Taupo, had lunch, then drove up to Rotorua and took my dog to a hot water stream. From there we carried on to my Airbnb in Matamata, where I stayed for two nights. In that area I checked out Mount Maunganui and Hobbiton (didn't do the tour, though).\n\nThen drove up to Coromandel and camped near Hikuai for 3 nights, then one night near the Pinnacles. Took a day trip to Hahei Beach, and another day drove all the way down and around up to the town of Coromandel.\n\nAfter that, drove all the way down to my next Airbnb near Mangaweka — a cool farm stay. The next day I drove down to Putangirua Pinnacles, then over to Wellington for dinner, then took the overnight ferry back to Picton. Got off the ferry the next day and drove back to Christchurch.",
-    photos: []
+    photos: [],
+    // Individual stop pins along the route — each gets its own small
+    // marker; clicking it opens a lightweight popup (blurb + photos)
+    // rather than the full trip sidebar. Add real photos to any stop's
+    // `photos` array any time — src paths under images/trips/<trip id>/stops/<stop id>/.
+    stops: [
+      { id: "otaki-forks", label: "Otaki Forks Campsite", coords: [-40.8667, 175.2333], blurb: "Camped here on night one, straight off the Picton–Wellington ferry.", photos: [] },
+      { id: "new-plymouth", label: "New Plymouth", coords: [-39.0556, 174.0752], blurb: "Lunch stop — Taranaki was completely socked in by cloud, and it was raining.", photos: [] },
+      { id: "three-sisters-elephant-rock", label: "Three Sisters & Elephant Rock", coords: [-38.7561, 174.6608], blurb: "Coastal rock formations at Tongaporutu, on the drive north.", photos: [] },
+      { id: "piopio", label: "Piopio", coords: [-38.3833, 175.0167], blurb: "Passed through on the way to the second night's camp.", photos: [] },
+      { id: "ohinepane", label: "Ohinepane Camping Area", coords: [-39.0500, 175.3667], blurb: "Second night's camp, along the Whanganui River.", photos: [] },
+      { id: "waitonga-falls", label: "Waitonga Falls Track", coords: [-39.2333, 175.5333], blurb: "Hiked this waterfall track in Tongariro National Park.", photos: [] },
+      { id: "tawhai-falls-gollums-pool", label: "Tawhai Falls / Gollum's Pool", coords: [-39.1967, 175.5644], blurb: "The LOTR filming location for Gollum's Pool.", photos: [] },
+      { id: "mount-doom", label: "Mount Doom (Ngauruhoe)", coords: [-39.1568, 175.6323], blurb: "Drove right past Mount Doom itself.", photos: [] },
+      { id: "lake-taupo", label: "Lake Taupo", coords: [-38.7867, 175.9700], blurb: "Stayed at an Airbnb here — checked out the lake and had lunch.", photos: [] },
+      { id: "rotorua", label: "Rotorua", coords: [-38.1368, 176.2497], blurb: "Took the dog to a hot water stream.", photos: [] },
+      { id: "matamata-hobbiton", label: "Matamata / Hobbiton", coords: [-37.8722, 175.6828], blurb: "Stayed two nights nearby — saw Hobbiton from outside (skipped the tour).", photos: [] },
+      { id: "mount-maunganui", label: "Mount Maunganui", coords: [-37.6314, 176.1833], blurb: "Day trip from Matamata.", photos: [] },
+      { id: "coromandel-hikuai", label: "Coromandel — Hikuai", coords: [-36.9667, 175.7500], blurb: "Camped here for 3 nights.", photos: [] },
+      { id: "the-pinnacles", label: "The Pinnacles", coords: [-37.2075, 175.6367], blurb: "One night camping near here.", photos: [] },
+      { id: "hahei-beach", label: "Hahei Beach", coords: [-36.8167, 175.8167], blurb: "Day trip to the beach.", photos: [] },
+      { id: "coromandel-town", label: "Coromandel Town", coords: [-36.7597, 175.4978], blurb: "Drove all the way around to the town itself.", photos: [] },
+      { id: "mangaweka", label: "Mangaweka", coords: [-39.7667, 175.7889], blurb: "Cool farm-stay Airbnb.", photos: [] },
+      { id: "putangirua-pinnacles", label: "Putangirua Pinnacles", coords: [-41.4700, 175.2011], blurb: "Stopped here on the way back to Wellington.", photos: [] }
+    ]
   }
 ];

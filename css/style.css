@@ -399,6 +399,48 @@ body.view-map .back-link {
   filter: drop-shadow(0 0 3px rgba(0,0,0,0.85));
 }
 
+/* Small waypoint pins for individual stops along a trip's route
+   (camps, viewpoints, towns...) — deliberately understated next to
+   the bold trip/recommendation markers. */
+.stop-marker {
+  width: 10px;
+  height: 10px;
+  margin: 2px;
+  border-radius: 50%;
+  background: var(--gray-warm);
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.55);
+}
+
+.stop-popup h3 {
+  margin: 0 0 4px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stop-popup p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.stop-popup__photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.stop-popup__photos img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 /* ---------- Sidebar ---------- */
 
 .sidebar {

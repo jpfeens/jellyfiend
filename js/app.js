@@ -132,7 +132,62 @@
       if (trip.route && trip.route.length) {
         buildRouteLayers(trip, style, record);
       }
+
+      if (trip.stops && trip.stops.length) {
+        buildStopMarkers(trip, record);
+      }
     });
+  }
+
+  // ---------------------------------------------------------------
+  // Stop markers — small pins for individual stops along a trip's
+  // route (camps, viewpoints, towns...). Clicking one opens a
+  // lightweight Leaflet popup right at that pin (blurb + photos, if
+  // any) rather than the full trip sidebar. Tracked in the same
+  // record.routeLayers list so they show/hide with region & tag
+  // filters exactly like everything else for the trip.
+  // ---------------------------------------------------------------
+  function buildStopMarkers(trip, record) {
+    trip.stops.forEach(function (stop) {
+      var icon = L.divIcon({
+        className: "",
+        html: '<div class="stop-marker"></div>',
+        iconSize: [14, 14]
+      });
+
+      var stopMarker = L.marker(stop.coords, { icon: icon, title: stop.label });
+      stopMarker.bindTooltip(stop.label, { direction: "top", offset: [0, -6] });
+      stopMarker.bindPopup(renderStopPopup(stop), { maxWidth: 260 });
+      stopMarker.on("popupopen", function (e) {
+        e.popup.getElement().querySelectorAll("[data-photo-src]").forEach(function (img) {
+          img.addEventListener("click", function () {
+            openLightbox(img.dataset.photoSrc, img.dataset.photoCaption || "");
+          });
+        });
+      });
+
+      addRouteLayer(record, stopMarker);
+    });
+  }
+
+  function renderStopPopup(stop) {
+    var photos = (stop.photos || [])
+      .map(function (p) {
+        return (
+          '<img src="' + p.src + '" alt="' + escapeHtml(p.caption || stop.label) +
+          '" loading="lazy" data-photo-src="' + p.src +
+          '" data-photo-caption="' + escapeHtml(p.caption || "") + '">'
+        );
+      })
+      .join("");
+
+    return (
+      '<div class="stop-popup">' +
+      "<h3>" + escapeHtml(stop.label) + "</h3>" +
+      (stop.blurb ? "<p>" + escapeHtml(stop.blurb) + "</p>" : "") +
+      (photos ? '<div class="stop-popup__photos">' + photos + "</div>" : "") +
+      "</div>"
+    );
   }
 
   // ---------------------------------------------------------------
