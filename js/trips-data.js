@@ -113,11 +113,18 @@ const TRIPS = [
     location: "Anchorage → Denali → Fairbanks → Valdez",
     tags: ["roadtrip", "extended-vacation"],
     coords: [63.1148, -151.1926],
+    // `route` is a list of "legs" — each is either `mode: "drive"` (snapped
+    // to real roads via the Mapbox Directions API at load time, with a
+    // straight dashed line shown as a fallback while that loads / if it
+    // fails) or `mode: "ferry"` (drawn as a dashed line with a boat marker,
+    // since there's obviously no road for a sea crossing).
     route: [
-      [61.2181, -149.9003],
-      [63.1148, -151.1926],
-      [64.8378, -147.7164],
-      [61.1308, -146.3483]
+      { mode: "drive", through: [
+        [61.2181, -149.9003],
+        [63.1148, -151.1926],
+        [64.8378, -147.7164],
+        [61.1308, -146.3483]
+      ] }
     ],
     summary: "Two weeks, one rental truck, and a loop through the best of the interior — this is the trip that started it all.",
     body: "Replace this with your real trip report. A few notes on formatting:\n\nYou can use **bold text**, *italic text*, and line breaks like this.\n\n- Bullet points work too\n- Just start a line with a dash\n- Great for gear lists or day-by-day notes\n\nWrite as much as you want here — the sidebar scrolls.",
@@ -268,30 +275,44 @@ const TRIPS = [
     tags: ["roadtrip", "lotr", "camping", "hiking", "waterfalls"],
     coords: [-39.2, 175.58],
     route: [
-      [-43.5320, 172.6306],
-      [-41.2917, 174.0028],
-      [-41.2865, 174.7762],
-      [-40.8667, 175.2333],
-      [-39.0556, 174.0752],
-      [-38.7561, 174.6608],
-      [-38.3833, 175.0167],
-      [-39.0500, 175.3667],
-      [-39.2333, 175.5333],
-      [-39.1967, 175.5644],
-      [-39.1568, 175.6323],
-      [-38.7867, 175.9700],
-      [-38.1368, 176.2497],
-      [-37.8722, 175.6828],
-      [-37.6314, 176.1833],
-      [-36.9667, 175.7500],
-      [-37.2075, 175.6367],
-      [-36.8167, 175.8167],
-      [-36.7597, 175.4978],
-      [-39.7667, 175.7889],
-      [-41.4700, 175.2011],
-      [-41.2865, 174.7762],
-      [-41.2917, 174.0028],
-      [-43.5320, 172.6306]
+      { mode: "drive", through: [
+        [-43.5320, 172.6306], // Christchurch
+        [-41.2917, 174.0028]  // Picton
+      ] },
+      { mode: "ferry", through: [
+        [-41.2917, 174.0028], // Picton
+        [-41.2865, 174.7762]  // Wellington
+      ] },
+      { mode: "drive", through: [
+        [-41.2865, 174.7762], // Wellington
+        [-40.8667, 175.2333], // Otaki Forks
+        [-39.0556, 174.0752], // New Plymouth
+        [-38.7561, 174.6608], // Three Sisters / Elephant Rock
+        [-38.3833, 175.0167], // Piopio
+        [-39.0500, 175.3667], // Ohinepane Camping Area
+        [-39.2333, 175.5333], // Tongariro / Waitonga Falls Track
+        [-39.1967, 175.5644], // Tawhai Falls / Gollum's Pool
+        [-39.1568, 175.6323], // Mount Doom (Ngauruhoe)
+        [-38.7867, 175.9700], // Lake Taupo
+        [-38.1368, 176.2497], // Rotorua
+        [-37.8722, 175.6828], // Matamata / Hobbiton
+        [-37.6314, 176.1833], // Mount Maunganui
+        [-36.9667, 175.7500], // Coromandel — Hikuai
+        [-37.2075, 175.6367], // The Pinnacles
+        [-36.8167, 175.8167], // Hahei Beach
+        [-36.7597, 175.4978], // Coromandel town
+        [-39.7667, 175.7889], // Mangaweka
+        [-41.4700, 175.2011], // Putangirua Pinnacles
+        [-41.2865, 174.7762]  // Wellington
+      ] },
+      { mode: "ferry", through: [
+        [-41.2865, 174.7762], // Wellington
+        [-41.2917, 174.0028]  // Picton
+      ] },
+      { mode: "drive", through: [
+        [-41.2917, 174.0028], // Picton
+        [-43.5320, 172.6306]  // Christchurch
+      ] }
     ],
     summary: "A Christmas-time loop from Christchurch through the North Island's volcanic heart and Hobbit country to the Coromandel and back — camping, waterfalls, hot streams, and more than a few Lord of the Rings filming spots.",
     body: "Drove from Christchurch to Picton, caught the ferry over to Wellington, then drove up to Otaki and camped at Otaki Forks Campsite for the first night.\n\nSecond day, drove past Taranaki (which was completely in the clouds) to New Plymouth for lunch — it was raining. Then past the Three Sisters and the Elephant Rock, through Piopio, and down to Ohinepane Camping Area for the second night.\n\nNext, drove down to Tongariro and hiked the Waitonga Falls Track, then up to Tawhai Falls and Gollum's Pool. Drove past Mount Doom on the way to Lake Taupo, where I stayed at an Airbnb.\n\nThe next day I checked out Lake Taupo, had lunch, then drove up to Rotorua and took my dog to a hot water stream. From there we carried on to my Airbnb in Matamata, where I stayed for two nights. In that area I checked out Mount Maunganui and Hobbiton (didn't do the tour, though).\n\nThen drove up to Coromandel and camped near Hikuai for 3 nights, then one night near the Pinnacles. Took a day trip to Hahei Beach, and another day drove all the way down and around up to the town of Coromandel.\n\nAfter that, drove all the way down to my next Airbnb near Mangaweka — a cool farm stay. The next day I drove down to Putangirua Pinnacles, then over to Wellington for dinner, then took the overnight ferry back to Picton. Got off the ferry the next day and drove back to Christchurch.",

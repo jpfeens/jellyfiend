@@ -126,17 +126,114 @@
         openSidebar(trip);
       });
 
-      if (trip.route && trip.route.length > 1) {
-        L.polyline(trip.route, {
-          color: style.color,
+      var record = { trip: trip, marker: marker, tags: trip.tags || [], routeLayers: [] };
+      markerRecords.push(record);
+
+      if (trip.route && trip.route.length) {
+        buildRouteLayers(trip, style, record);
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // Trip routes — each trip's `route` is a list of "legs":
+  //   { mode: "drive", through: [[lat,lng], ...] } — snapped to real
+  //     roads via the Mapbox Directions API (falls back to a straight
+  //     dashed line while that loads, or if the request fails)
+  //   { mode: "ferry", through: [[lat,lng], [lat,lng]] } — drawn as a
+  //     dashed line with a boat marker at the midpoint, since there's
+  //     no road for a sea crossing
+  // Layers are tracked per-trip in record.routeLayers so they can be
+  // shown/hidden by applyFilters() exactly like markers are.
+  // ---------------------------------------------------------------
+  function buildRouteLayers(trip, style, record) {
+    trip.route.forEach(function (leg) {
+      if (leg.mode === "ferry") {
+        addRouteLayer(record, L.polyline(leg.through, {
+          color: "#5aa7e0",
           weight: 3,
-          opacity: 0.7,
-          dashArray: "6 6"
-        }).addTo(map);
+          opacity: 0.85,
+          dashArray: "2 10"
+        }));
+
+        var start = leg.through[0];
+        var end = leg.through[leg.through.length - 1];
+        var mid = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
+        var boatIcon = L.divIcon({
+          className: "",
+          html: '<div class="ferry-marker">⛴️</div>',
+          iconSize: [26, 26]
+        });
+        var boatMarker = L.marker(mid, { icon: boatIcon, title: "Ferry crossing" });
+        boatMarker.bindTooltip("Ferry crossing", { direction: "top", offset: [0, -8] });
+        addRouteLayer(record, boatMarker);
+        return;
       }
 
-      markerRecords.push({ trip: trip, marker: marker, tags: trip.tags || [] });
+      // Drive leg — show a straight dashed line immediately, then swap
+      // in the real road-snapped path once (if) the Directions API
+      // responds. Keeps the map useful even if the request fails.
+      var fallback = L.polyline(leg.through, {
+        color: style.color,
+        weight: 3,
+        opacity: 0.5,
+        dashArray: "6 6"
+      });
+      addRouteLayer(record, fallback);
+
+      fetchDrivingRoute(leg.through)
+        .then(function (roadCoords) {
+          removeRouteLayer(record, fallback);
+          addRouteLayer(record, L.polyline(roadCoords, {
+            color: style.color,
+            weight: 3,
+            opacity: 0.8
+          }));
+        })
+        .catch(function () {
+          /* keep the straight-line fallback already on the map */
+        });
     });
+  }
+
+  // Mapbox Directions API — snaps a chain of waypoints to real roads.
+  // Accepts up to 25 coordinates per request (driving profile).
+  function fetchDrivingRoute(waypoints) {
+    var coordStr = waypoints
+      .map(function (c) { return c[1] + "," + c[0]; }) // Mapbox wants lng,lat
+      .join(";");
+    var url =
+      "https://api.mapbox.com/directions/v5/mapbox/driving/" +
+      coordStr +
+      "?geometries=geojson&overview=full&access_token=" +
+      MAP_CONFIG.mapboxToken;
+
+    return fetch(url)
+      .then(function (res) {
+        if (!res.ok) throw new Error("Directions API error " + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        if (!data.routes || !data.routes.length) throw new Error("No route returned");
+        return data.routes[0].geometry.coordinates.map(function (c) { return [c[1], c[0]]; });
+      });
+  }
+
+  function addRouteLayer(record, layer) {
+    record.routeLayers.push(layer);
+    if (isVisible(record)) layer.addTo(map);
+  }
+
+  function removeRouteLayer(record, layer) {
+    var idx = record.routeLayers.indexOf(layer);
+    if (idx !== -1) record.routeLayers.splice(idx, 1);
+    if (map.hasLayer(layer)) map.removeLayer(layer);
+  }
+
+  function isVisible(record) {
+    var matchesRegion = !currentRegion || record.trip.region === currentRegion;
+    var matchesTags = record.tags.some(function (t) { return activeTags.has(t); });
+    return matchesRegion && matchesTags;
   }
 
   // ---------------------------------------------------------------
@@ -251,12 +348,17 @@
   function applyFilters() {
     if (!map) return;
     markerRecords.forEach(function (rec) {
-      var matchesRegion = !currentRegion || rec.trip.region === currentRegion;
-      var matchesTags = rec.tags.some(function (t) { return activeTags.has(t); });
-      var visible = matchesRegion && matchesTags;
+      var visible = isVisible(rec);
+
       var onMap = map.hasLayer(rec.marker);
       if (visible && !onMap) rec.marker.addTo(map);
       if (!visible && onMap) map.removeLayer(rec.marker);
+
+      rec.routeLayers.forEach(function (layer) {
+        var layerOnMap = map.hasLayer(layer);
+        if (visible && !layerOnMap) layer.addTo(map);
+        if (!visible && layerOnMap) map.removeLayer(layer);
+      });
     });
   }
 
